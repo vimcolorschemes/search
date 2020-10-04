@@ -1,0 +1,29 @@
+{
+  "name": "vimcolorschemes-search",
+  "version": "0.1.0",
+  "description": "Search index proxy for vimcolorschemes",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "format": "prettier --write \"**/*.{js,json,md}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reobin/vimcolorschemes-search.git"
+  },
+  "author": "@reobin",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/reobin/vimcolorschemes-search/issues"
+  },
+  "homepage": "https://github.com/reobin/vimcolorschemes-search#readme",
+  "devDependencies": {
+    "prettier": "^2.1.2"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "request": "^2.88.2"
+  }
+}
