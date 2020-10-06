@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/reobin/vimcolorschemes-search.git"
+    "url": "git+https://github.com/vimcolorschemes/vimcolorschemes-search.git"
   },
   "author": "@reobin",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/reobin/vimcolorschemes-search/issues"
+    "url": "https://github.com/vimcolorschemes/vimcolorschemes-search/issues"
   },
-  "homepage": "https://github.com/reobin/vimcolorschemes-search#readme",
+  "homepage": "https://github.com/vimcolorschemes/vimcolorschemes-search#readme",
   "devDependencies": {
     "prettier": "^2.1.2"
   },
@@ -24,6 +24,6 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "request": "^2.88.2"
+    "http-proxy-middleware": "^1.0.5"
   }
 }
