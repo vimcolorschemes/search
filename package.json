@@ -3,21 +3,23 @@
   "version": "0.1.0",
   "description": "Search index proxy for vimcolorschemes",
   "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "format": "prettier --write \"**/*.{js,json,md}\""
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vimcolorschemes/vimcolorschemes-search.git"
+    "url": "git+https://github.com/vimcolorschemes/search.git"
   },
   "author": "@reobin",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/vimcolorschemes/vimcolorschemes-search/issues"
+    "url": "https://github.com/vimcolorschemes/search/issues"
   },
-  "homepage": "https://github.com/vimcolorschemes/vimcolorschemes-search#readme",
+  "homepage": "https://github.com/vimcolorschemes/search#readme",
+  "scripts": {
+    "start": "node index.js",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "postinstall": "husky install"
+  },
   "devDependencies": {
+    "husky": "^5.0.0-beta.0",
     "prettier": "^2.1.2"
   },
   "dependencies": {
