@@ -15,11 +15,9 @@
   "homepage": "https://github.com/vimcolorschemes/search#readme",
   "scripts": {
     "start": "node index.js",
-    "format": "prettier --write \"**/*.{js,json,md}\"",
-    "postinstall": "husky install"
+    "format": "prettier --write \"**/*.{js,json,md}\""
   },
   "devDependencies": {
-    "husky": "^5.0.0-beta.0",
     "prettier": "^2.1.2"
   },
   "dependencies": {
