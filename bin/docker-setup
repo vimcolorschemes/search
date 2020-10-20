@@ -29,6 +29,12 @@ echo "
 |___/_/_/_/_/\__/\___/_/\___/_/ /___/\__/_//_/\__/_/_/_/\__/___/
 "
 
+echo "${BREAK_LINE}Creating vimcolorschemes network"
+
+docker network create --driver bridge vimcolorschemes &>/dev/null \
+  && "vimcolorschemes network created$BREAK_LINE" \
+  || echo "vimcolorschemes network exists$BREAK_LINE"
+
 echo "${BREAK_LINE}Building the container images$BREAK_LINE"
 
 docker-compose build
