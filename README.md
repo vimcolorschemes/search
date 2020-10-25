@@ -1,7 +1,7 @@
 # vimcolorschemes/search
 
 This a basic proxy API for elasticsearch used by
-[vimcolorschemes](https://github.com/reobin/vimcolorschemes).
+[vimcolorschemes](https://github.com/vimcolorschemes/vimcolorschemes).
 
 ## Get started
 
