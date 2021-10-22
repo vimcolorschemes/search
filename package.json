@@ -15,7 +15,8 @@
   "homepage": "https://github.com/vimcolorschemes/search#readme",
   "scripts": {
     "start": "node index.js",
-    "format": "prettier --write \"**/*.{js,json,md}\""
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "docker": "./bin/docker/start"
   },
   "devDependencies": {
     "prettier": "^2.4.1"
