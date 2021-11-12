@@ -44,30 +44,30 @@ function buildElasticSearchRequestBody(body) {
  */
 function sanitizeQuery(query) {
   if (query == null) {
-    return "";
+    return '';
   }
 
-  const characters = query.split("");
+  const characters = query.split('');
 
   for (let i = 0; i < query.length; i++) {
     characters[i] = sanitizeCharacter(query[i]);
   }
 
-  return characters.join("");
+  return characters.join('');
 }
 
 function sanitizeCharacter(character) {
   if (character == null) {
-    return "";
+    return '';
   }
 
   return character
-    .replace(/[*+\-=~><"?^${}():!/[\]\\\s]/g, "\\$&") // Replace reserved characters
-    .replace(/\|\|/g, "\\||") // replace ||
-    .replace(/&&/g, "\\&&") // replace &&
-    .replace(/AND/g, "\\A\\N\\D") // replace AND
-    .replace(/OR/g, "\\O\\R") // replace OR
-    .replace(/NOT/g, "\\N\\O\\T"); // replace NOT
+    .replace(/[*+\-=~><"?^${}():!/[\]\\\s]/g, '\\$&') // Replace reserved characters
+    .replace(/\|\|/g, '\\||') // replace ||
+    .replace(/&&/g, '\\&&') // replace &&
+    .replace(/AND/g, '\\A\\N\\D') // replace AND
+    .replace(/OR/g, '\\O\\R') // replace OR
+    .replace(/NOT/g, '\\N\\O\\T'); // replace NOT
 }
 
 const ElasticSearchHelper = {

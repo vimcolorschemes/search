@@ -10,16 +10,16 @@ paths below to run the app.
 
 ### Local
 
-  1. [Install elasticsearch locally](https://www.elastic.co/start)
-  2. Make sure elasticsearch is running
-  3. `cd` into the root of the repository
-  2. `npm install`
-  3. `npm start`
+1. [Install elasticsearch locally](https://www.elastic.co/start)
+2. Make sure elasticsearch is running
+3. `cd` into the root of the repository
+4. `npm install`
+5. `npm start`
 
 ### Docker
 
-  1. `cd` into the root of the repository
-  2. Run `bin/docker-setup`
+1. `cd` into the root of the repository
+2. Run `bin/docker-setup`
 
 That's it. 2 docker containers will be built and started, 1 for elasticsearch,
 and 1 for the search proxy.
