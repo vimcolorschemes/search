@@ -4,6 +4,8 @@ const express = require("express");
 const cors = require("cors");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
+const ElasticSearchHelper = require("./helpers/elasticSearch");
+
 const HOST = process.env.ELASTICSEARCH_HOST || "http://localhost:9200";
 const USERNAME = process.env.ELASTICSEARCH_USERNAME;
 const PASSWORD = process.env.ELASTICSEARCH_PASSWORD;
@@ -14,6 +16,13 @@ const proxy = createProxyMiddleware({
   target: HOST,
   changeOrigin: true,
   auth: USERNAME && PASSWORD ? `${USERNAME}:${PASSWORD}` : undefined,
+  onProxyReq: (proxyReq, req) => {
+    const body = ElasticSearchHelper.buildElasticSearchRequestBody(req.body);
+    const bodyData = JSON.stringify(body);
+    proxyReq.setHeader("Content-Type", "application/json");
+    proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
+    proxyReq.write(bodyData);
+  },
 });
 
 const app = express();
@@ -24,5 +33,7 @@ app.use(
     optionsSuccessStatus: 200,
   }),
 );
+
+app.use(express.json());
 app.use("/", proxy);
 app.listen(process.env.PORT || 3000);
