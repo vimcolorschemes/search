@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/vimcolorschemes/search/internal/dotenv"
 )
 
 type MyEvent struct {
@@ -15,7 +17,13 @@ type MyResponse struct {
 }
 
 func HandleLambdaEvent(event MyEvent) (MyResponse, error) {
-	return MyResponse{Message: fmt.Sprintf("%s is %d years old!", event.Name, event.Age)}, nil
+	test, exists := dotenv.Get("SEARCH_TEST")
+
+	if exists {
+		return MyResponse{Message: fmt.Sprintf("%s is %d years old! %s", event.Name, event.Age, test)}, nil
+	}
+
+	return MyResponse{Message: fmt.Sprintf("%s is %d years old! no dotenv", event.Name, event.Age)}, nil
 }
 
 func main() {
