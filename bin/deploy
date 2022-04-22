@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+echo "Build"
+GOOS=linux go build -o main main.go
+
+echo "Zip"
+zip --junk-paths main.zip main
+
+echo "Update AWS Lambda"
+aws lambda update-function-code --function-name vimcolorschemes-search --zip-file fileb://main.zip

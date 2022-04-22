@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+BREAK_LINE="
+"
+
+echo "AWS CLI output:"
+aws lambda invoke --function-name vimcolorschemes-search --invocation-type "RequestResponse" response.txt
+echo "${BREAK_LINE}Function output:"
+cat response.txt
+rm response.txt
