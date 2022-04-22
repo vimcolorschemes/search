@@ -5,12 +5,31 @@ import (
 	"github.com/vimcolorschemes/search/internal/database"
 )
 
+const (
+	Store  = "store"
+	Search = "search"
+)
+
 type Event struct {
-	Name string `json:"What is your name?"`
-	Age  int    `json:"How old are you?"`
+	Action string `json:"action"`
 }
 
 func HandleLambdaEvent(event Event) (interface{}, error) {
+	switch event.Action {
+	case Store:
+		return store()
+	case Search:
+		return search()
+	default:
+		return "", nil
+	}
+}
+
+func store() (interface{}, error) {
+	return "", nil
+}
+
+func search() (interface{}, error) {
 	searchIndex := database.GetSearchIndex()
 	return searchIndex, nil
 }
