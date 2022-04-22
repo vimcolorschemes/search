@@ -7,7 +7,7 @@ echo "AWS CLI output:"
 
 aws lambda invoke \
   --function-name vimcolorschemes-search \
-  --payload '{ "What is your name?": "Jim", "How old are you?": 33 }' \
+  --payload '{ "action": "search" }' \
   --cli-binary-format raw-in-base64-out \
   response.json
 
