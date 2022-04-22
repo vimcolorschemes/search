@@ -4,7 +4,13 @@ BREAK_LINE="
 "
 
 echo "AWS CLI output:"
-aws lambda invoke --function-name vimcolorschemes-search --invocation-type "RequestResponse" response.txt
+
+aws lambda invoke \
+  --function-name vimcolorschemes-search \
+  --payload '{ "What is your name?": "Jim", "How old are you?": 33 }' \
+  --cli-binary-format raw-in-base64-out \
+  response.json
+
 echo "${BREAK_LINE}Function output:"
-cat response.txt
-rm response.txt
+cat response.json
+rm response.json
