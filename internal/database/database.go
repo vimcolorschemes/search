@@ -54,11 +54,15 @@ func setAuth(clientOptions *options.ClientOptions) {
 }
 
 // StoreSearchIndex stores the payload in the search index collection
-func StoreSearchIndex(searchIndex interface{}) bool {
-	return false
+func StoreSearchIndex(searchIndex interface{}) error {
+	entry := make(map[string]interface{})
+	entry["index"] = searchIndex
+
+	result := searchIndexCollection.FindOneAndReplace(ctx, bson.M{}, entry)
+	return result.Err()
 }
 
-// GetSearchIndex stores the payload in the search index collection
+// GetSearchIndex returns the whole search index
 func GetSearchIndex() interface{} {
 	var result map[string]interface{}
 
