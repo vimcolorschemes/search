@@ -14,10 +14,10 @@ const (
 )
 
 func handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	switch request.QueryStringParameters["action"] {
-	case Store:
+	switch request.HTTPMethod {
+	case "POST":
 		return store(request.Body)
-	case Search:
+	case "GET":
 		return search(request.QueryStringParameters["term"])
 	default:
 		return events.APIGatewayProxyResponse{StatusCode: 400}, nil
