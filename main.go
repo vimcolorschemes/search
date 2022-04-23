@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/vimcolorschemes/search/internal/database"
 )
@@ -12,38 +13,35 @@ const (
 	Search = "search"
 )
 
-type Event struct {
-	Action  string `json:"action"`
-	Payload string `json:"payload"`
-}
-
-func handle(event Event) (interface{}, error) {
-	switch event.Action {
+func handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	switch request.QueryStringParameters["action"] {
 	case Store:
-		return store(event.Payload)
+		return store(request.Body)
 	case Search:
-		return search(event.Payload)
+		return search(request.QueryStringParameters["term"])
 	default:
-		return "", nil
+		return events.APIGatewayProxyResponse{StatusCode: 400}, nil
 	}
 }
 
-func store(payload string) (interface{}, error) {
-	var searchIndex map[string]interface{}
+func store(payload string) (events.APIGatewayProxyResponse, error) {
+	var searchIndex interface{}
+
 	if err := json.Unmarshal([]byte(payload), &searchIndex); err != nil {
-		return "", err
+		return events.APIGatewayProxyResponse{StatusCode: 500}, err
 	}
 
 	if err := database.StoreSearchIndex(searchIndex); err != nil {
-		return "", err
+		return events.APIGatewayProxyResponse{StatusCode: 500}, err
 	}
 
-	return "Success", nil
+	return events.APIGatewayProxyResponse{Body: "success", StatusCode: 200}, nil
 }
 
-func search(term string) (interface{}, error) {
+func search(term string) (events.APIGatewayProxyResponse, error) {
 	searchIndex := database.GetSearchIndex()
-	return searchIndex, nil
+	payload, _ := json.Marshal(searchIndex)
+	return events.APIGatewayProxyResponse{Body: string(payload), StatusCode: 200}, nil
 }
 
 func main() {

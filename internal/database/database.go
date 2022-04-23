@@ -28,7 +28,6 @@ func init() {
 	}
 
 	clientOptions := options.Client().ApplyURI(connectionString)
-	setAuth(clientOptions)
 
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
@@ -42,15 +41,6 @@ func init() {
 
 	database := client.Database("vimcolorschemes")
 	searchIndexCollection = database.Collection("search")
-}
-
-func setAuth(clientOptions *options.ClientOptions) {
-	databaseUsername, usernameExists := dotenv.Get("MONGODB_USERNAME")
-	databasePassword, passwordExists := dotenv.Get("MONGODB_PASSWORD")
-	if usernameExists && databaseUsername != "" && passwordExists && databasePassword != "" {
-		credentials := options.Credential{Username: databaseUsername, Password: databasePassword}
-		clientOptions.SetAuth(credentials)
-	}
 }
 
 // StoreSearchIndex stores the payload in the search index collection
