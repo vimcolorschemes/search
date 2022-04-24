@@ -63,3 +63,9 @@ func GetSearchIndex() interface{} {
 
 	return result["index"]
 }
+
+// Search queries the mongo database and returns the result
+func Search(query string, page int, perPage int) ([]interface{}, int) {
+	repositories := []interface{}{}
+	return repositories, 0
+}
