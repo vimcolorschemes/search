@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/vimcolorschemes/search/internal/database"
+	"github.com/vimcolorschemes/search/internal/repository"
 )
 
 const (
@@ -29,7 +30,7 @@ func handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 }
 
 func store(payload string) (events.APIGatewayProxyResponse, error) {
-	var searchIndex []interface{}
+	var searchIndex []repository.Repository
 
 	if err := json.Unmarshal([]byte(payload), &searchIndex); err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 500, Headers: Headers}, err
@@ -48,7 +49,10 @@ func search(parameters map[string]string) (events.APIGatewayProxyResponse, error
 		return events.APIGatewayProxyResponse{StatusCode: 400, Headers: Headers}, err
 	}
 
-	repositories, totalCount := database.Search(query, page, perPage)
+	repositories, totalCount, err := database.Search(query, page, perPage)
+	if err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 400, Headers: Headers}, err
+	}
 
 	result := map[string]interface{}{"repositories": repositories, "totalCount": totalCount}
 
