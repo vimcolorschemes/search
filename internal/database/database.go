@@ -3,10 +3,9 @@ package database
 import (
 	"context"
 	"log"
-	"os"
-	"strings"
 
 	"github.com/vimcolorschemes/search/internal/dotenv"
+	"github.com/vimcolorschemes/search/internal/repository"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,14 +16,9 @@ var ctx = context.TODO()
 var searchIndexCollection *mongo.Collection
 
 func init() {
-	if strings.HasSuffix(os.Args[0], ".test") {
-		// Running in test mode
-		return
-	}
-
 	connectionString, exists := dotenv.Get("MONGODB_CONNECTION_STRING")
 	if !exists {
-		log.Panic("Database connection string not found in env")
+		log.Fatal("Database connection string not found in env")
 	}
 
 	clientOptions := options.Client().ApplyURI(connectionString)
@@ -44,18 +38,24 @@ func init() {
 }
 
 // Store stores the payload in the search index collection
-func Store(searchIndex []interface{}) error {
+func Store(searchIndex []repository.Repository) error {
 	deleteResult, err := searchIndexCollection.DeleteMany(ctx, bson.M{})
 	if err != nil {
-		log.Panic("Error while deleting previous search index")
+		log.Fatal("Error while deleting previous search index")
 		return err
 	}
 
 	log.Printf("Deleted %d repositories from search index", deleteResult.DeletedCount)
 
-	insertResult, err := searchIndexCollection.InsertMany(ctx, searchIndex)
+	documents := []interface{}{}
+
+	for _, repository := range searchIndex {
+		documents = append(documents, repository)
+	}
+
+	insertResult, err := searchIndexCollection.InsertMany(ctx, documents)
 	if err != nil {
-		log.Panic("Error while inserting new search index")
+		log.Fatal("Error while inserting new search index")
 		return err
 	}
 
@@ -65,7 +65,18 @@ func Store(searchIndex []interface{}) error {
 }
 
 // Search queries the mongo database and returns the result
-func Search(query string, page int, perPage int) ([]interface{}, int) {
-	repositories := []interface{}{}
-	return repositories, 0
+func Search(query string, page int, perPage int) ([]repository.Repository, int, error) {
+	cursor, err := searchIndexCollection.Find(ctx, bson.M{"name": query})
+	if err != nil {
+		return []repository.Repository{}, -1, err
+	}
+
+	defer cursor.Close(ctx)
+
+	var results = []repository.Repository{}
+	if err = cursor.All(ctx, &results); err != nil {
+		return []repository.Repository{}, -1, err
+	}
+
+	return results, 0, nil
 }
