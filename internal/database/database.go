@@ -3,11 +3,13 @@ package database
 import (
 	"context"
 	"log"
+	"strings"
 
 	"github.com/vimcolorschemes/search/internal/dotenv"
 	"github.com/vimcolorschemes/search/internal/repository"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -66,7 +68,25 @@ func Store(searchIndex []repository.Repository) error {
 
 // Search queries the mongo database and returns the result
 func Search(query string, page int, perPage int) ([]repository.Repository, int, error) {
-	cursor, err := searchIndexCollection.Find(ctx, bson.M{"name": query})
+	queries := bson.A{}
+	for _, word := range strings.Split(query, " ") {
+		queries = append(queries,
+			bson.D{
+				{
+					Key: "$or",
+					Value: bson.A{
+						bson.D{{Key: "name", Value: primitive.Regex{Pattern: word, Options: "i"}}},
+						bson.D{{Key: "owner.name", Value: primitive.Regex{Pattern: word, Options: "i"}}},
+						bson.D{{Key: "description", Value: primitive.Regex{Pattern: word, Options: "i"}}},
+					},
+				},
+			},
+		)
+	}
+
+	filters := bson.D{{Key: "$and", Value: queries}}
+
+	cursor, err := searchIndexCollection.Find(ctx, filters)
 	if err != nil {
 		return []repository.Repository{}, -1, err
 	}
