@@ -29,17 +29,17 @@ func handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 }
 
 func store(payload string) (events.APIGatewayProxyResponse, error) {
-	var searchIndex interface{}
+	var searchIndex []interface{}
 
 	if err := json.Unmarshal([]byte(payload), &searchIndex); err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 500, Headers: Headers}, err
 	}
 
-	if err := database.StoreSearchIndex(searchIndex); err != nil {
+	if err := database.Store(searchIndex); err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 500, Headers: Headers}, err
 	}
 
-	return events.APIGatewayProxyResponse{Body: "success", StatusCode: 200, Headers: Headers}, nil
+	return events.APIGatewayProxyResponse{StatusCode: 200, Headers: Headers}, nil
 }
 
 func search(parameters map[string]string) (events.APIGatewayProxyResponse, error) {

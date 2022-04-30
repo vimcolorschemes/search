@@ -43,25 +43,25 @@ func init() {
 	searchIndexCollection = database.Collection("search")
 }
 
-// StoreSearchIndex stores the payload in the search index collection
-func StoreSearchIndex(searchIndex interface{}) error {
-	entry := make(map[string]interface{})
-	entry["index"] = searchIndex
-
-	result := searchIndexCollection.FindOneAndReplace(ctx, bson.M{}, entry)
-	return result.Err()
-}
-
-// GetSearchIndex returns the whole search index
-func GetSearchIndex() interface{} {
-	var result map[string]interface{}
-
-	err := searchIndexCollection.FindOne(ctx, bson.M{}).Decode(&result)
+// Store stores the payload in the search index collection
+func Store(searchIndex []interface{}) error {
+	deleteResult, err := searchIndexCollection.DeleteMany(ctx, bson.M{})
 	if err != nil {
-		panic(err)
+		log.Panic("Error while deleting previous search index")
+		return err
 	}
 
-	return result["index"]
+	log.Printf("Deleted %d repositories from search index", deleteResult.DeletedCount)
+
+	insertResult, err := searchIndexCollection.InsertMany(ctx, searchIndex)
+	if err != nil {
+		log.Panic("Error while inserting new search index")
+		return err
+	}
+
+	log.Printf("Inserted %d repositories into search index", len(insertResult.InsertedIDs))
+
+	return nil
 }
 
 // Search queries the mongo database and returns the result
