@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log"
+	"regexp"
 	"strings"
 
 	"github.com/vimcolorschemes/search/internal/dotenv"
@@ -68,22 +69,7 @@ func Store(searchIndex []repository.Repository) error {
 
 // Search queries the mongo database and returns the result
 func Search(query string, page int, perPage int) ([]repository.Repository, int, error) {
-	queries := bson.A{}
-	for _, word := range strings.Split(query, " ") {
-		queries = append(queries,
-			bson.D{
-				{
-					Key: "$or",
-					Value: bson.A{
-						bson.D{{Key: "name", Value: primitive.Regex{Pattern: word, Options: "i"}}},
-						bson.D{{Key: "owner.name", Value: primitive.Regex{Pattern: word, Options: "i"}}},
-						bson.D{{Key: "description", Value: primitive.Regex{Pattern: word, Options: "i"}}},
-					},
-				},
-			},
-		)
-	}
-
+	queries := buildSearchQueries(query)
 	filters := bson.D{{Key: "$and", Value: queries}}
 
 	cursor, err := searchIndexCollection.Find(ctx, filters)
@@ -99,4 +85,39 @@ func Search(query string, page int, perPage int) ([]repository.Repository, int, 
 	}
 
 	return results, 0, nil
+}
+
+func buildSearchQueries(query string) bson.A {
+	queries := bson.A{}
+
+	for _, word := range strings.Split(query, " ") {
+		word = normalizeQuery(word)
+		queries = append(queries,
+			bson.D{
+				{
+					Key: "$or",
+					Value: bson.A{
+						bson.D{{Key: "name", Value: primitive.Regex{Pattern: word, Options: "i"}}},
+						bson.D{{Key: "owner.name", Value: primitive.Regex{Pattern: word, Options: "i"}}},
+						bson.D{{Key: "description", Value: primitive.Regex{Pattern: word, Options: "i"}}},
+					},
+				},
+			},
+		)
+	}
+
+	return queries
+}
+
+func normalizeQuery(query string) string {
+	remove := regexp.MustCompile(`[\{\}\[\]\(\)\\\$\^]`)
+	query = remove.ReplaceAllString(query, "")
+
+	replace := regexp.MustCompile(`\/`)
+	query = replace.ReplaceAllString(query, " ")
+
+	escape := regexp.MustCompile(`([\+\|\?])`)
+	query = escape.ReplaceAllString(query, `\$1`)
+
+	return strings.Trim(query, " ")
 }
