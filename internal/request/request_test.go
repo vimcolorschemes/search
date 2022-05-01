@@ -8,7 +8,7 @@ import (
 
 func TestParseSearchParameters(t *testing.T) {
 	t.Run("should return all parameters and convert number parameters from string", func(t *testing.T) {
-		parameters := map[string]string{"query": "test", "page": "1", "perPage": "10"}
+		parameters := map[string]string{"query": "test", "page": "1", "perPage": "10", "backgrounds": "dark,light"}
 		request := events.APIGatewayProxyRequest{QueryStringParameters: parameters}
 
 		result, err := ParseSearchParameters(request)
@@ -26,6 +26,10 @@ func TestParseSearchParameters(t *testing.T) {
 
 		if result.PerPage != 10 {
 			t.Errorf("Incorrect result for ParseSearchParameters, got perPage: %d, want perPage: %d", result.PerPage, 10)
+		}
+
+		if len(result.Backgrounds) != 2 {
+			t.Errorf("Incorrect result for ParseSearchParameters, got backgrounds: %s, want backgrounds: %s", result.Backgrounds, []string{"dark", "light"})
 		}
 	})
 
@@ -106,6 +110,26 @@ func TestParseSearchParameters(t *testing.T) {
 		_, err := ParseSearchParameters(request)
 		if err == nil {
 			t.Error("Incorrect result for ParseSearchParameters, expected error for perPage parameter being negative")
+		}
+	})
+
+	t.Run("should return error when the backgrounds is missing", func(t *testing.T) {
+		parameters := map[string]string{"query": "test", "page": "10", "perPage": "10"}
+		request := events.APIGatewayProxyRequest{QueryStringParameters: parameters}
+
+		_, err := ParseSearchParameters(request)
+		if err == nil {
+			t.Error("Incorrect result for ParseSearchParameters, expected error for backgrounds missing")
+		}
+	})
+
+	t.Run("should return error when the backgrounds is empty", func(t *testing.T) {
+		parameters := map[string]string{"query": "test", "page": "10", "perPage": "10", "backgrounds": ""}
+		request := events.APIGatewayProxyRequest{QueryStringParameters: parameters}
+
+		_, err := ParseSearchParameters(request)
+		if err == nil {
+			t.Error("Incorrect result for ParseSearchParameters, expected error for backgrounds being empty")
 		}
 	})
 }
