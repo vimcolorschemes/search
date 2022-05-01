@@ -3,6 +3,7 @@ package request
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	"strconv"
@@ -26,7 +27,7 @@ func ParseSearchParameters(request events.APIGatewayProxyRequest) (SearchParamet
 
 	page, err := strconv.Atoi(request.QueryStringParameters["page"])
 	if err != nil {
-		return SearchParameters{}, err
+		return SearchParameters{}, errors.New(fmt.Sprintf("error parsing '%s' as integer", request.QueryStringParameters["page"]))
 	}
 	if page < 1 {
 		return SearchParameters{}, errors.New("page parameter in smaller than 1")
@@ -34,7 +35,7 @@ func ParseSearchParameters(request events.APIGatewayProxyRequest) (SearchParamet
 
 	perPage, err := strconv.Atoi(request.QueryStringParameters["perPage"])
 	if err != nil {
-		return SearchParameters{}, err
+		return SearchParameters{}, errors.New(fmt.Sprintf("error parsing '%s' as integer", request.QueryStringParameters["perPage"]))
 	}
 	if perPage < 1 {
 		return SearchParameters{}, errors.New("perPage parameter smaller than 1")
