@@ -3,11 +3,11 @@ package database
 import (
 	"context"
 	"log"
-	"regexp"
 	"strings"
 
 	"github.com/vimcolorschemes/search/internal/dotenv"
 	"github.com/vimcolorschemes/search/internal/repository"
+	"github.com/vimcolorschemes/search/internal/str"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -91,7 +91,7 @@ func buildSearchQueries(query string) bson.A {
 	queries := bson.A{}
 
 	for _, word := range strings.Split(query, " ") {
-		word = normalizeQuery(word)
+		word = str.Normalize(word)
 		queries = append(queries,
 			bson.D{
 				{
@@ -107,17 +107,4 @@ func buildSearchQueries(query string) bson.A {
 	}
 
 	return queries
-}
-
-func normalizeQuery(query string) string {
-	remove := regexp.MustCompile(`[\{\}\[\]\(\)\\\$\^]`)
-	query = remove.ReplaceAllString(query, "")
-
-	replace := regexp.MustCompile(`\/`)
-	query = replace.ReplaceAllString(query, " ")
-
-	escape := regexp.MustCompile(`([\+\|\?])`)
-	query = escape.ReplaceAllString(query, `\$1`)
-
-	return strings.Trim(query, " ")
 }
