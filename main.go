@@ -20,47 +20,53 @@ var Headers = map[string]string{"Access-Control-Allow-Origin": "*"}
 func handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch request.HTTPMethod {
 	case "POST":
-		return store(request)
+		return store(request), nil
 	case "GET":
-		return search(request)
+		return search(request), nil
 	default:
-		return events.APIGatewayProxyResponse{StatusCode: 400, Headers: Headers}, nil
+		body := req.BuildErrorBody("HTTP Method not supported")
+		return events.APIGatewayProxyResponse{Body: body, StatusCode: 400, Headers: Headers}, nil
 	}
 }
 
-func store(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func store(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	var searchIndex []repository.Repository
 
 	if err := json.Unmarshal([]byte(request.Body), &searchIndex); err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 500, Headers: Headers}, err
+		body := req.BuildErrorBody("Error trying to parse request body:", err.Error())
+		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
 	}
 
 	if err := database.Store(searchIndex); err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 500, Headers: Headers}, err
+		body := req.BuildErrorBody("Error trying to store the search index:", err.Error())
+		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
 	}
 
-	return events.APIGatewayProxyResponse{StatusCode: 200, Headers: Headers}, nil
+	return events.APIGatewayProxyResponse{StatusCode: 200, Headers: Headers}
 }
 
-func search(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func search(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	parameters, err := req.ParseSearchParameters(request)
 	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 400, Headers: Headers}, err
+		body := req.BuildErrorBody("Error parsing search parameters:", err.Error())
+		return events.APIGatewayProxyResponse{Body: body, StatusCode: 400, Headers: Headers}
 	}
 
 	repositories, totalCount, err := database.Search(parameters)
 	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 400, Headers: Headers}, err
+		body := req.BuildErrorBody("Error storing search index:", err.Error())
+		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
 	}
 
 	result := map[string]interface{}{"repositories": repositories, "totalCount": totalCount}
 
 	payload, err := json.Marshal(result)
 	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 400, Headers: Headers}, err
+		body := req.BuildErrorBody("Error encoding search result to JSON:", err.Error())
+		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
 	}
 
-	return events.APIGatewayProxyResponse{Body: string(payload), StatusCode: 200, Headers: Headers}, nil
+	return events.APIGatewayProxyResponse{Body: string(payload), StatusCode: 200, Headers: Headers}
 }
 
 func main() {
