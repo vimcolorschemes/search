@@ -52,13 +52,13 @@ func search(request events.APIGatewayProxyRequest) events.APIGatewayProxyRespons
 		return events.APIGatewayProxyResponse{Body: body, StatusCode: 400, Headers: Headers}
 	}
 
-	repositories, totalCount, err := database.Search(parameters)
+	repositories, total, err := database.Search(parameters)
 	if err != nil {
 		body := req.BuildErrorBody("Error storing search index:", err.Error())
 		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
 	}
 
-	result := map[string]interface{}{"repositories": repositories, "totalCount": totalCount}
+	result := map[string]interface{}{"repositories": repositories, "totalCount": total}
 
 	payload, err := json.Marshal(result)
 	if err != nil {

@@ -69,11 +69,14 @@ func Store(searchIndex []repository.Repository) error {
 }
 
 // Search queries the mongo database and returns the result
-func Search(parameters request.SearchParameters) ([]repository.Repository, int, error) {
-	queries := buildSearchQueries(parameters.Query)
-	filters := bson.D{{Key: "$and", Value: queries}}
+func Search(parameters request.SearchParameters) ([]repository.Repository, int64, error) {
+	filters := bson.D{{Key: "$and", Value: buildSearchQueries(parameters.Query)}}
 
-	cursor, err := searchIndexCollection.Find(ctx, filters)
+	options := new(options.FindOptions)
+	options.SetSkip(int64((parameters.Page - 1) * parameters.PerPage))
+	options.SetLimit(int64(parameters.PerPage))
+
+	cursor, err := searchIndexCollection.Find(ctx, filters, options)
 	if err != nil {
 		return []repository.Repository{}, -1, err
 	}
@@ -85,7 +88,12 @@ func Search(parameters request.SearchParameters) ([]repository.Repository, int, 
 		return []repository.Repository{}, -1, err
 	}
 
-	return results, 0, nil
+	total, err := searchIndexCollection.CountDocuments(ctx, filters)
+	if err != nil {
+		return []repository.Repository{}, -1, err
+	}
+
+	return results, total, nil
 }
 
 func buildSearchQueries(query string) bson.A {
