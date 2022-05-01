@@ -70,7 +70,7 @@ func Store(searchIndex []repository.Repository) error {
 
 // Search queries the mongo database and returns the result
 func Search(parameters request.SearchParameters) ([]repository.Repository, int64, error) {
-	filters := bson.D{{Key: "$and", Value: buildSearchQueries(parameters.Query)}}
+	filters := bson.D{{Key: "$and", Value: buildQueries(parameters)}}
 
 	options := new(options.FindOptions)
 	options.SetSkip(int64((parameters.Page - 1) * parameters.PerPage))
@@ -96,6 +96,16 @@ func Search(parameters request.SearchParameters) ([]repository.Repository, int64
 	return results, total, nil
 }
 
+func buildQueries(parameters request.SearchParameters) bson.A {
+	queries := buildSearchQueries(parameters.Query)
+	backgroundFilterQuery := buildBackgroundFilterQuery(parameters.Backgrounds)
+	if backgroundFilterQuery != nil {
+		queries = append(queries, backgroundFilterQuery)
+	}
+
+	return queries
+}
+
 func buildSearchQueries(query string) bson.A {
 	queries := bson.A{}
 
@@ -116,4 +126,8 @@ func buildSearchQueries(query string) bson.A {
 	}
 
 	return queries
+}
+
+func buildBackgroundFilterQuery(backgrounds []string) bson.M {
+	return bson.M{"vimcolorschemes.backgrounds": bson.M{"$in": backgrounds}}
 }

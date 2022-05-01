@@ -12,9 +12,10 @@ import (
 )
 
 type SearchParameters struct {
-	Query   string
-	Page    int
-	PerPage int
+	Query       string
+	Page        int
+	PerPage     int
+	Backgrounds []string
 }
 
 // ParseSearchParameters returns correctly formatted search parameters for a
@@ -41,10 +42,16 @@ func ParseSearchParameters(request events.APIGatewayProxyRequest) (SearchParamet
 		return SearchParameters{}, errors.New("perPage parameter smaller than 1")
 	}
 
+	backgrounds := strings.Split(request.QueryStringParameters["backgrounds"], ",")
+	if len(backgrounds) == 0 {
+		return SearchParameters{}, errors.New("backgrounds is empty")
+	}
+
 	parameters := SearchParameters{
-		Query:   query,
-		Page:    page,
-		PerPage: perPage,
+		Query:       query,
+		Page:        page,
+		PerPage:     perPage,
+		Backgrounds: backgrounds,
 	}
 
 	return parameters, nil
