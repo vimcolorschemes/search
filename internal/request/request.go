@@ -1,7 +1,10 @@
 package request
 
 import (
+	"encoding/json"
 	"errors"
+	"strings"
+
 	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -25,16 +28,16 @@ func ParseSearchParameters(request events.APIGatewayProxyRequest) (SearchParamet
 	if err != nil {
 		return SearchParameters{}, err
 	}
-	if page < 0 {
-		return SearchParameters{}, errors.New("page parameter in negative")
+	if page < 1 {
+		return SearchParameters{}, errors.New("page parameter in smaller than 1")
 	}
 
 	perPage, err := strconv.Atoi(request.QueryStringParameters["perPage"])
 	if err != nil {
 		return SearchParameters{}, err
 	}
-	if perPage < 0 {
-		return SearchParameters{}, errors.New("perPage parameter in negative")
+	if perPage < 1 {
+		return SearchParameters{}, errors.New("perPage parameter smaller than 1")
 	}
 
 	parameters := SearchParameters{
@@ -44,4 +47,17 @@ func ParseSearchParameters(request events.APIGatewayProxyRequest) (SearchParamet
 	}
 
 	return parameters, nil
+}
+
+// BuildErrorBody builds a JSON request response body using an error message
+func BuildErrorBody(messages ...string) string {
+	body := make(map[string]string)
+	body["message"] = strings.Join(messages, " ")
+
+	payload, err := json.Marshal(body)
+	if err != nil {
+		return ""
+	}
+
+	return string(payload)
 }
