@@ -22,7 +22,7 @@ var searchIndexCollection *mongo.Collection
 func init() {
 	connectionString, exists := dotenv.Get("MONGODB_CONNECTION_STRING")
 	if !exists {
-		log.Fatal("Database connection string not found in env")
+		log.Fatal("database connection string not found in env")
 	}
 
 	clientOptions := options.Client().ApplyURI(connectionString)
@@ -45,11 +45,11 @@ func init() {
 func Store(searchIndex []repository.Repository) error {
 	deleteResult, err := searchIndexCollection.DeleteMany(ctx, bson.M{})
 	if err != nil {
-		log.Fatal("Error while deleting previous search index")
+		log.Fatal("error while deleting previous search index")
 		return err
 	}
 
-	log.Printf("Deleted %d repositories from search index", deleteResult.DeletedCount)
+	log.Printf("deleted %d repositories from search index", deleteResult.DeletedCount)
 
 	documents := []interface{}{}
 
@@ -59,11 +59,11 @@ func Store(searchIndex []repository.Repository) error {
 
 	insertResult, err := searchIndexCollection.InsertMany(ctx, documents)
 	if err != nil {
-		log.Fatal("Error while inserting new search index")
+		log.Fatal("error while inserting new search index")
 		return err
 	}
 
-	log.Printf("Inserted %d repositories into search index", len(insertResult.InsertedIDs))
+	log.Printf("inserted %d repositories into search index", len(insertResult.InsertedIDs))
 
 	return nil
 }

@@ -18,6 +18,11 @@ type SearchParameters struct {
 	Backgrounds []string
 }
 
+const (
+	Light = "light"
+	Dark  = "dark"
+)
+
 // ParseSearchParameters returns correctly formatted search parameters for a
 // GET request query parameters
 func ParseSearchParameters(request events.APIGatewayProxyRequest) (SearchParameters, error) {
@@ -31,7 +36,7 @@ func ParseSearchParameters(request events.APIGatewayProxyRequest) (SearchParamet
 		return SearchParameters{}, errors.New(fmt.Sprintf("error parsing '%s' as integer", request.QueryStringParameters["page"]))
 	}
 	if page < 1 {
-		return SearchParameters{}, errors.New("page parameter in smaller than 1")
+		return SearchParameters{}, errors.New("page parameter is smaller than 1")
 	}
 
 	perPage, err := strconv.Atoi(request.QueryStringParameters["perPage"])
@@ -39,12 +44,15 @@ func ParseSearchParameters(request events.APIGatewayProxyRequest) (SearchParamet
 		return SearchParameters{}, errors.New(fmt.Sprintf("error parsing '%s' as integer", request.QueryStringParameters["perPage"]))
 	}
 	if perPage < 1 {
-		return SearchParameters{}, errors.New("perPage parameter smaller than 1")
+		return SearchParameters{}, errors.New("perPage parameter is smaller than 1")
 	}
 
 	backgrounds := strings.Split(request.QueryStringParameters["backgrounds"], ",")
-	if len(backgrounds) == 0 {
-		return SearchParameters{}, errors.New("backgrounds is empty")
+	for _, background := range backgrounds {
+		if background != Light && background != Dark {
+			summary := fmt.Sprintf("['%s']", strings.Join(backgrounds, "', '"))
+			return SearchParameters{}, errors.New(fmt.Sprintf("at least one background is invalid in %s. valid values are ['light', 'dark']", summary))
+		}
 	}
 
 	parameters := SearchParameters{

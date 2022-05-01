@@ -24,7 +24,7 @@ func handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	case "GET":
 		return search(request), nil
 	default:
-		body := req.BuildErrorBody("HTTP Method not supported")
+		body := req.BuildErrorBody("HTTP method not supported")
 		return events.APIGatewayProxyResponse{Body: body, StatusCode: 400, Headers: Headers}, nil
 	}
 }
@@ -33,12 +33,12 @@ func store(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 	var searchIndex []repository.Repository
 
 	if err := json.Unmarshal([]byte(request.Body), &searchIndex); err != nil {
-		body := req.BuildErrorBody("Error trying to parse request body:", err.Error())
+		body := req.BuildErrorBody("error trying to parse request body:", err.Error())
 		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
 	}
 
 	if err := database.Store(searchIndex); err != nil {
-		body := req.BuildErrorBody("Error trying to store the search index:", err.Error())
+		body := req.BuildErrorBody("error trying to store the search index:", err.Error())
 		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
 	}
 
@@ -48,13 +48,13 @@ func store(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 func search(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	parameters, err := req.ParseSearchParameters(request)
 	if err != nil {
-		body := req.BuildErrorBody("Error parsing search parameters:", err.Error())
+		body := req.BuildErrorBody("error parsing search parameters:", err.Error())
 		return events.APIGatewayProxyResponse{Body: body, StatusCode: 400, Headers: Headers}
 	}
 
 	repositories, total, err := database.Search(parameters)
 	if err != nil {
-		body := req.BuildErrorBody("Error storing search index:", err.Error())
+		body := req.BuildErrorBody("error storing search index:", err.Error())
 		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
 	}
 
@@ -62,7 +62,7 @@ func search(request events.APIGatewayProxyRequest) events.APIGatewayProxyRespons
 
 	payload, err := json.Marshal(result)
 	if err != nil {
-		body := req.BuildErrorBody("Error encoding search result to JSON:", err.Error())
+		body := req.BuildErrorBody("error encoding search result to JSON:", err.Error())
 		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
 	}
 
