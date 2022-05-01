@@ -7,7 +7,8 @@ import (
 
 	"github.com/vimcolorschemes/search/internal/dotenv"
 	"github.com/vimcolorschemes/search/internal/repository"
-	"github.com/vimcolorschemes/search/internal/str"
+	"github.com/vimcolorschemes/search/internal/request"
+	str "github.com/vimcolorschemes/search/internal/string"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -68,8 +69,8 @@ func Store(searchIndex []repository.Repository) error {
 }
 
 // Search queries the mongo database and returns the result
-func Search(query string, page int, perPage int) ([]repository.Repository, int, error) {
-	queries := buildSearchQueries(query)
+func Search(parameters request.SearchParameters) ([]repository.Repository, int, error) {
+	queries := buildSearchQueries(parameters.Query)
 	filters := bson.D{{Key: "$and", Value: queries}}
 
 	cursor, err := searchIndexCollection.Find(ctx, filters)

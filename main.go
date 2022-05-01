@@ -2,13 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
-	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/vimcolorschemes/search/internal/database"
 	"github.com/vimcolorschemes/search/internal/repository"
+	req "github.com/vimcolorschemes/search/internal/request"
 )
 
 const (
@@ -21,18 +20,18 @@ var Headers = map[string]string{"Access-Control-Allow-Origin": "*"}
 func handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch request.HTTPMethod {
 	case "POST":
-		return store(request.Body)
+		return store(request)
 	case "GET":
-		return search(request.QueryStringParameters)
+		return search(request)
 	default:
 		return events.APIGatewayProxyResponse{StatusCode: 400, Headers: Headers}, nil
 	}
 }
 
-func store(payload string) (events.APIGatewayProxyResponse, error) {
+func store(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var searchIndex []repository.Repository
 
-	if err := json.Unmarshal([]byte(payload), &searchIndex); err != nil {
+	if err := json.Unmarshal([]byte(request.Body), &searchIndex); err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 500, Headers: Headers}, err
 	}
 
@@ -43,13 +42,13 @@ func store(payload string) (events.APIGatewayProxyResponse, error) {
 	return events.APIGatewayProxyResponse{StatusCode: 200, Headers: Headers}, nil
 }
 
-func search(parameters map[string]string) (events.APIGatewayProxyResponse, error) {
-	query, page, perPage, err := getSearchParameters(parameters)
+func search(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	parameters, err := req.ParseSearchParameters(request)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 400, Headers: Headers}, err
 	}
 
-	repositories, totalCount, err := database.Search(query, page, perPage)
+	repositories, totalCount, err := database.Search(parameters)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 400, Headers: Headers}, err
 	}
@@ -62,25 +61,6 @@ func search(parameters map[string]string) (events.APIGatewayProxyResponse, error
 	}
 
 	return events.APIGatewayProxyResponse{Body: string(payload), StatusCode: 200, Headers: Headers}, nil
-}
-
-func getSearchParameters(parameters map[string]string) (string, int, int, error) {
-	query := parameters["query"]
-	if query == "" {
-		return "", -1, -1, errors.New("query is invalid")
-	}
-
-	page, err := strconv.Atoi(parameters["page"])
-	if err != nil {
-		return "", -1, -1, err
-	}
-
-	perPage, err := strconv.Atoi(parameters["perPage"])
-	if err != nil {
-		return "", -1, -1, err
-	}
-
-	return query, page, perPage, nil
 }
 
 func main() {
