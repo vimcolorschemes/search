@@ -6,7 +6,9 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/vimcolorschemes/search/internal/bucket"
 	"github.com/vimcolorschemes/search/internal/database"
+	"github.com/vimcolorschemes/search/internal/dotenv"
 	"github.com/vimcolorschemes/search/internal/repository"
 	req "github.com/vimcolorschemes/search/internal/request"
 )
@@ -17,6 +19,10 @@ const (
 )
 
 var Headers = map[string]string{"Access-Control-Allow-Origin": "*"}
+
+type StoreRequestBody struct {
+	Key string
+}
 
 func handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch request.HTTPMethod {
@@ -31,10 +37,29 @@ func handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 }
 
 func store(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
-	var searchIndex []repository.Repository
+	var requestBody StoreRequestBody
 
-	if err := json.Unmarshal([]byte(request.Body), &searchIndex); err != nil {
+	if err := json.Unmarshal([]byte(request.Body), &requestBody); err != nil {
 		body := req.BuildErrorBody("error trying to parse request body:", err.Error())
+		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
+	}
+
+	bucketName, exists := dotenv.Get("AWS_S3_BUCKET")
+	if !exists {
+		body := req.BuildErrorBody("AWS_S3_BUCKET env variable is missing")
+		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
+	}
+
+
+	fileContent, err := bucket.Get(bucketName, requestBody.Key)
+	if err != nil {
+		body := req.BuildErrorBody("error fetching search index file from s3:", err.Error())
+		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
+	}
+
+	var searchIndex []repository.Repository
+	if err := json.Unmarshal([]byte(fileContent), &searchIndex); err != nil {
+		body := req.BuildErrorBody("error parsing search index content as JSON:", err.Error())
 		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
 	}
 
