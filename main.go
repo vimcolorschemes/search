@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -24,7 +25,7 @@ func handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	case "GET":
 		return search(request), nil
 	default:
-		body := req.BuildErrorBody("HTTP method not supported")
+		body := req.BuildErrorBody(fmt.Sprintf("HTTP method not supported: %s", request.HTTPMethod))
 		return events.APIGatewayProxyResponse{Body: body, StatusCode: 400, Headers: Headers}, nil
 	}
 }
