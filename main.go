@@ -50,7 +50,6 @@ func store(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 		return events.APIGatewayProxyResponse{Body: body, StatusCode: 500, Headers: Headers}
 	}
 
-
 	fileContent, err := bucket.Get(bucketName, requestBody.Key)
 	if err != nil {
 		body := req.BuildErrorBody("error fetching search index file from s3:", err.Error())
