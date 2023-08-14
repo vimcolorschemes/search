@@ -119,6 +119,7 @@ func buildSearchQueries(query string) bson.A {
 						bson.D{{Key: "name", Value: primitive.Regex{Pattern: word, Options: "i"}}},
 						bson.D{{Key: "owner.name", Value: primitive.Regex{Pattern: word, Options: "i"}}},
 						bson.D{{Key: "description", Value: primitive.Regex{Pattern: word, Options: "i"}}},
+						bson.D{{Key: "vimcolorschemes.name", Value: primitive.Regex{Pattern: word, Options: "i"}}},
 					},
 				},
 			},
