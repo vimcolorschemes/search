@@ -93,6 +93,10 @@ func Search(parameters request.SearchParameters) ([]repository.Repository, int64
 		return []repository.Repository{}, -1, err
 	}
 
+	for _, result := range results {
+		result.SortVimColorSchemesBySearchTermMatch(parameters.Query)
+	}
+
 	return results, total, nil
 }
 

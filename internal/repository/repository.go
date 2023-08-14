@@ -1,6 +1,9 @@
 package repository
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // Repository represents a repository as it's stored in the database
 type Repository struct {
@@ -38,4 +41,16 @@ type VimColorSchemeData struct {
 type VimColorSchemeGroup struct {
 	Name    string `json:"name"`
 	HexCode string `json:"hexCode"`
+}
+
+// SortVimColorSchemesBySearchTermMatch will put at the first index of the
+// repository's VimColorSchemes slice the first VimColorScheme whose name
+// contains the search term.
+func (repository *Repository) SortVimColorSchemesBySearchTermMatch(query string) {
+	for i, vimColorScheme := range repository.VimColorSchemes {
+		if strings.Contains(strings.ToLower(vimColorScheme.Name), strings.ToLower(query)) {
+			repository.VimColorSchemes[0], repository.VimColorSchemes[i] = repository.VimColorSchemes[i], repository.VimColorSchemes[0]
+			return
+		}
+	}
 }
