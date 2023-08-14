@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo "Build"
-GOOS=linux go build -o main main.go
+GOARCH=amd64 GOOS=linux go build -o main main.go
 
 echo "Zip"
 zip --junk-paths main.zip main
